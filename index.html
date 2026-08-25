@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>הלכה בצ׳אט</title>
+<style>
+:root{--bg:#f4f7f1;--card:#fff;--text:#20251e;--muted:#687166;--border:#dbe2d7;--accent:#36583d;--soft:#eef3ec}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,system-ui,sans-serif}.wrap{max-width:1050px;margin:auto;padding:22px}.brand{display:flex;gap:12px;align-items:center}.logo{width:52px;height:52px;border-radius:14px;background:var(--accent);display:grid;place-items:center;font-size:28px}h1{margin:0}.sub,.note{color:var(--muted);font-size:13px}.card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:18px;margin-top:16px}textarea{width:100%;min-height:115px;border:1px solid #cad3c7;border-radius:12px;padding:13px;font:inherit;font-size:17px}.groups{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.group{border:1px solid var(--border);border-radius:14px;padding:13px;background:#fafbf8}.opt{display:flex;gap:8px;margin:9px 0;align-items:center}.opt input{width:18px;height:18px;accent-color:var(--accent)}button{width:100%;border:0;border-radius:12px;padding:14px;background:var(--accent);color:white;font-size:16px;font-weight:bold;cursor:pointer}.status{margin-top:12px;background:var(--soft);padding:11px;border-radius:10px}.result{margin-top:14px;border:1px solid var(--border);border-radius:14px;display:grid;grid-template-columns:1.2fr .8fr;overflow:hidden}.source{padding:16px}.image{padding:16px;background:#fafbf8;border-right:1px solid var(--border);display:grid;place-items:center;text-align:center;color:var(--muted);min-height:180px}@media(max-width:700px){.groups,.result{grid-template-columns:1fr}.image{border-right:0;border-top:1px solid var(--border)}}
+</style></head>
+<body><main class="wrap">
+<div class="brand"><div class="logo">📖</div><div><h1>הלכה בצ׳אט</h1><div class="sub">איתור מקורות הלכתיים — לא הכרעה הלכתית</div></div></div>
+<section class="card"><h2>מה השאלה שלך?</h2><textarea id="q" placeholder="לדוגמה: לולב שנפרצו עליו, כשר?"></textarea></section>
+<section class="card"><h2>בחר רבנים ומקורות</h2><div class="groups">
+<div class="group"><h3>ספרדים</h3><label class="opt"><input type="checkbox" checked>מרן השולחן ערוך</label><label class="opt"><input type="checkbox">הרב עובדיה יוסף</label><label class="opt"><input type="checkbox">הרב יצחק יוסף</label></div>
+<div class="group"><h3>תימנים</h3><label class="opt"><input type="checkbox" checked>הרב יצחק רצאבי</label><label class="opt"><input type="checkbox">הרב שלמה קורח</label><label class="opt"><input type="checkbox">הרב יוסף צובירי</label></div>
+<div class="group"><h3>אשכנזים</h3><label class="opt"><input type="checkbox" checked>משנה ברורה</label><label class="opt"><input type="checkbox">ערוך השולחן</label><label class="opt"><input type="checkbox">אגרות משה</label></div>
+</div></section>
+<section class="card"><button id="ask">חפש מקורות</button><div class="status" id="status">גרסת GitHub ראשונית. אין פקודות או שרת מקומי במחשב.</div></section>
+<section class="card"><h2>מקורות</h2><div id="results" class="note">לא בוצע חיפוש עדיין.</div></section>
+</main><script>
+document.getElementById('ask').onclick=()=>{const q=document.getElementById('q').value.trim();const r=document.getElementById('results');if(!q){r.textContent='כתוב שאלה תחילה.';return}r.innerHTML='<div class="result"><div class="source"><strong>החיפוש המקוון יחובר בשלב הבא</strong><p>השאלה שנקלטה: '+q.replace(/[&<>]/g,s=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[s]))+'</p><p class="note">המטרה: להציג כאן שם הפוסק, ספר, מראה מקום ולשון המקור המדויקת — בלי להמציא פסק.</p></div><div class="image"><div><strong>תמונת השוואה</strong><br><br>כאן תופיע תמונה ממקור תורני מאושר כאשר קיימת.</div></div></div>';};
+</script></body></html>
