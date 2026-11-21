@@ -234,9 +234,13 @@ function Results({ result }: { result: SearchResponse }) {
         {stageB.similar ? (
           <p className="mt-1 text-sm">
             הסוגיה הקרובה שנמצאה:{' '}
-            <a href={stageB.similar.url} target="_blank" rel="noreferrer" className="text-accent underline">
-              {stageB.similar.ref}
-            </a>
+            {stageB.similar.url ? (
+              <a href={stageB.similar.url} target="_blank" rel="noreferrer" className="text-accent underline">
+                {stageB.similar.ref}
+              </a>
+            ) : (
+              stageB.similar.ref
+            )}
           </p>
         ) : (
           <p className="mt-1 text-sm text-muted">לא נמצאה סוגיה בספרי הספרייה.</p>
@@ -284,10 +288,15 @@ function Results({ result }: { result: SearchResponse }) {
                   <div className="mt-2 flex flex-wrap gap-x-3 text-xs text-muted">
                     <span>עדה: {r.community}</span>
                     <span>מאגר: {r.repository}</span>
-                    <a href={r.url} target="_blank" rel="noreferrer" className="text-accent underline">
-                      לקישור למקור
-                    </a>
+                    {r.url ? (
+                      <a href={r.url} target="_blank" rel="noreferrer" className="text-accent underline">
+                        לקישור למקור
+                      </a>
+                    ) : (
+                      <span>אין קישור מקוון לספר זה</span>
+                    )}
                   </div>
+                  {r.note && <div className="mt-1 text-xs text-muted">{r.note}</div>}
                 </li>
               ))}
             </ol>
@@ -315,9 +324,13 @@ function Results({ result }: { result: SearchResponse }) {
                         <td className="p-2">{r.community}</td>
                         <td className="p-2 font-serif">{r.text.length > 220 ? r.text.slice(0, 220) + '…' : r.text}</td>
                         <td className="p-2">
-                          <a href={r.url} target="_blank" rel="noreferrer" className="text-accent underline">
-                            {r.ref}
-                          </a>
+                          {r.url ? (
+                            <a href={r.url} target="_blank" rel="noreferrer" className="text-accent underline">
+                              {r.ref}
+                            </a>
+                          ) : (
+                            r.ref
+                          )}
                         </td>
                       </tr>
                     ))}

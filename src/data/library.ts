@@ -8,6 +8,7 @@
 //   sefaria    — ספר שהטקסט שלו נשלף מספריא. path הוא נתיב הקטגוריה בספריא.
 //   wikisource — ספר בוויקיטקסט העברי. titlePrefix הוא תחילת שם הדף.
 //   web        — רשימת דפים ספציפיים (קישורים). המערכת קוראת רק את הדפים האלה.
+//   feed       — קובץ נתונים שמפורסם במקום אחר (למשל באתר צג חומה). נקרא ישירות משם, בלי עותק כפול.
 //   none       — רשום בספרייה אבל עדיין לא מחובר טכנית (יוצג כ"לא מחובר").
 // =====================================================================
 
@@ -18,6 +19,7 @@ export type LibraryAccess =
   | { type: 'sefaria'; path: string }
   | { type: 'wikisource'; titlePrefix: string }
   | { type: 'web'; urls: Array<string> }
+  | { type: 'feed'; format: 'tzaghoma-yalkut'; url: string; partsUrl: string; credit: string }
   | { type: 'none'; note?: string }
 
 export type LibraryEntry = {
@@ -78,10 +80,16 @@ export const LIBRARY: Array<LibraryEntry> = [
   },
   {
     id: 'yalkut-yosef',
-    title: 'ילקוט יוסף',
+    title: 'קיצור שולחן ערוך ילקוט יוסף',
     author: 'הרב יצחק יוסף',
     community: 'ספרדי',
-    access: { type: 'none', note: 'ממתין למאגר מורשה' },
+    access: {
+      type: 'feed',
+      format: 'tzaghoma-yalkut',
+      url: 'https://tzaghoma.co.il/js/yalkut-data.js',
+      partsUrl: 'https://tzaghoma.co.il/js/yalkut-parts.js',
+      credit: 'קיצור שולחן ערוך ילקוט יוסף (תשס״ז), באישור המכון להצגה במסכי צג חומה',
+    },
   },
 
   // ---------- אשכנזי ----------
@@ -161,6 +169,9 @@ export function entryDomains(entry: LibraryEntry): Array<string> {
       return ['he.wikisource.org']
     case 'web':
       return entry.access.urls.map((u) => hostOf(u))
+    case 'feed':
+      // הטקסט נמסר מקובץ שאושר לנו, לא מאתר מקורות; אין עליו סינון אתרים
+      return []
     case 'none':
       return []
   }
@@ -182,6 +193,8 @@ export function accessLabel(access: LibraryAccess) {
       return 'ויקיטקסט'
     case 'web':
       return 'קישורים'
+    case 'feed':
+      return 'צג חומה'
     case 'none':
       return 'לא מחובר'
   }

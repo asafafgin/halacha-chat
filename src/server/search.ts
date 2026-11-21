@@ -11,6 +11,7 @@ import { searchWikisource } from './connectors/wikisource'
 import { searchWeb } from './connectors/web'
 import type { SourceHit } from './types'
 import { localEntryIds, searchLocal } from './connectors/local'
+import { searchFeeds } from './connectors/feed'
 import { normalizeForSearch, stem } from './text'
 
 const SearchInput = z.object({
@@ -116,16 +117,29 @@ export const searchHalacha = createServerFn({ method: 'POST' })
     // ספרים שיש להם עותק מקומי: מחפשים רק בו, בלי פנייה לאתרים
     const localIds = localEntryIds()
     const localEntries = searchable.filter((e) => localIds.has(e.id))
-    const remoteEntries = searchable.filter((e) => !localIds.has(e.id))
+    const feedEntries = searchable.filter((e) => e.access.type === 'feed')
+    const remoteEntries = searchable.filter((e) => !localIds.has(e.id) && e.access.type !== 'feed')
+    if (feedEntries.length) {
+      try {
+        const mainWords = keywords(stageA.searchQuery)
+        const direct = await searchFeeds(mainWords, feedEntries, 'all')
+        push(direct.length ? direct : await searchFeeds(mainWords, feedEntries, 'any', 2))
+      } catch (err) {
+        unavailable.add('צג חומה')
+        errors.push(`צג חומה: ${String((err as Error).message ?? err)}`)
+      }
+    }
+
     if (localEntries.length) {
       const mainWords = keywords(stageA.searchQuery)
+      const before = hits.length
       push(searchLocal(mainWords, localEntries, 'all'))
       for (const term of terms.slice(1)) {
-        if (hits.length >= 12) break
+        if (hits.length - before >= 12) break
         push(searchLocal(keywords(term), localEntries, 'all'))
       }
       // אם אין התאמה מלאה: סוגיה דומה (לפחות חלק מהמילים)
-      if (!hits.length) push(searchLocal(mainWords, localEntries, 'any'))
+      if (hits.length === before) push(searchLocal(mainWords, localEntries, 'any'))
     }
 
     if (remoteEntries.length) {
@@ -155,7 +169,7 @@ export const searchHalacha = createServerFn({ method: 'POST' })
     }
 
     const byId = new Map<string, LibraryEntry>(LIBRARY.map((e) => [e.id, e]))
-    const visible = hits.filter((h) => !blockedEntries.has(h.entryId) && hostAllowed(h.domain, domains))
+    const visible = hits.filter((h) => !blockedEntries.has(h.entryId) && (!h.domain || hostAllowed(h.domain, domains)))
     const filteredOutBySites = hits.length - visible.length
 
     const results: Array<SearchResult> = visible.map((h) => {
@@ -170,7 +184,7 @@ export const searchHalacha = createServerFn({ method: 'POST' })
     })
       // התאמות ישירות קודם, בלי לשנות את סדר המאגר בתוך כל קבוצה
       .sort((a, b) => Number(b.match === 'ישיר') - Number(a.match === 'ישיר'))
-      .slice(0, 15)
+      .slice(0, 18)
 
     const top = results[0]
     return {
