@@ -86,8 +86,8 @@ export const LIBRARY: Array<LibraryEntry> = [
     access: {
       type: 'feed',
       format: 'tzaghoma-yalkut',
-      url: 'https://tzaghoma.co.il/js/yalkut-data.js',
-      partsUrl: 'https://tzaghoma.co.il/js/yalkut-parts.js',
+      url: 'https://tzaghoma.co.il/kneset/js/yalkut-data.js',
+      partsUrl: 'https://tzaghoma.co.il/kneset/js/yalkut-parts.js',
       credit: 'קיצור שולחן ערוך ילקוט יוסף (תשס״ז), באישור המכון להצגה במסכי צג חומה',
     },
   },
