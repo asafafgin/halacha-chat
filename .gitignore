@@ -11,3 +11,6 @@ dist-ssr
 .vinxi
 __unconfig*
 todos.json
+
+# עותק מקומי של הספרייה (נבנה ב-npm run library:build)
+data/

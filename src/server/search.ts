@@ -10,6 +10,8 @@ import { searchSefaria } from './connectors/sefaria'
 import { searchWikisource } from './connectors/wikisource'
 import { searchWeb } from './connectors/web'
 import type { SourceHit } from './types'
+import { localEntryIds, searchLocal } from './connectors/local'
+import { normalizeForSearch, stem } from './text'
 
 const SearchInput = z.object({
   question: z.string().trim().min(1).max(MAX_QUESTION_LENGTH),
@@ -40,6 +42,8 @@ export type SearchResponse = {
   /** פוסקים שנבחרו אבל עדיין אין להם מאגר מחובר */
   notConnected: Array<{ title: string; author: string; note?: string }>
   images: Array<ApprovedImage>
+  /** מאגרים שלא ענו בזמן החיפוש */
+  unavailable: Array<string>
   errors: Array<string>
 }
 
@@ -68,17 +72,9 @@ function selectEntries(community: string, poskim: Array<string>) {
   })
 }
 
-/** גזע גס למילה עברית: בלי אותיות שימוש בתחילה ובלי סיומות ריבוי */
-function stem(word: string) {
-  let w = word
-  if (w.length > 4) w = w.replace(/^[והבלמשכ]{1,2}/, '')
-  if (w.length > 3) w = w.replace(/(ים|ין|ות|ה|ת)$/, '')
-  return w
-}
-
 function isDirect(text: string, query: string) {
   const words = keywords(query)
-  return words.length > 0 && words.every((w) => text.includes(stem(w)))
+  return words.length > 0 && words.every((w) => normalizeForSearch(text).includes(stem(w)))
 }
 
 export const searchHalacha = createServerFn({ method: 'POST' })
@@ -115,21 +111,47 @@ export const searchHalacha = createServerFn({ method: 'POST' })
     }
     // מחפשים גם בספרים שנחסמו, רק כדי לדווח כמה תוצאות סוננו
     const searchable = connected
-    for (const term of terms) {
-      const [sef, wiki] = await Promise.allSettled([
-        searchSefaria(term, searchable),
-        searchWikisource(term, searchable),
-      ])
-      if (sef.status === 'fulfilled') push(sef.value)
-      else errors.push(`ספריא: ${String(sef.reason?.message ?? sef.reason)}`)
-      if (wiki.status === 'fulfilled') push(wiki.value)
-      else errors.push(`ויקיטקסט: ${String(wiki.reason?.message ?? wiki.reason)}`)
-      if (hits.filter((h) => !blockedEntries.has(h.entryId)).length >= 12) break
+    const unavailable = new Set<string>()
+
+    // ספרים שיש להם עותק מקומי: מחפשים רק בו, בלי פנייה לאתרים
+    const localIds = localEntryIds()
+    const localEntries = searchable.filter((e) => localIds.has(e.id))
+    const remoteEntries = searchable.filter((e) => !localIds.has(e.id))
+    if (localEntries.length) {
+      const mainWords = keywords(stageA.searchQuery)
+      push(searchLocal(mainWords, localEntries, 'all'))
+      for (const term of terms.slice(1)) {
+        if (hits.length >= 12) break
+        push(searchLocal(keywords(term), localEntries, 'all'))
+      }
+      // אם אין התאמה מלאה: סוגיה דומה (לפחות חלק מהמילים)
+      if (!hits.length) push(searchLocal(mainWords, localEntries, 'any'))
     }
-    try {
-      push(await searchWeb(terms, searchable))
-    } catch (err) {
-      errors.push(`קישורים: ${String((err as Error).message ?? err)}`)
+
+    if (remoteEntries.length) {
+      for (const term of terms) {
+        const [sef, wiki] = await Promise.allSettled([
+          searchSefaria(term, remoteEntries),
+          searchWikisource(term, remoteEntries),
+        ])
+        if (sef.status === 'fulfilled') push(sef.value)
+        else {
+          unavailable.add('ספריא')
+          errors.push(`ספריא: ${String(sef.reason?.message ?? sef.reason)}`)
+        }
+        if (wiki.status === 'fulfilled') push(wiki.value)
+        else {
+          unavailable.add('ויקיטקסט')
+          errors.push(`ויקיטקסט: ${String(wiki.reason?.message ?? wiki.reason)}`)
+        }
+        if (hits.filter((h) => !blockedEntries.has(h.entryId)).length >= 12) break
+      }
+      try {
+        push(await searchWeb(terms, remoteEntries))
+      } catch (err) {
+        unavailable.add('קישורים מוגדרים')
+        errors.push(`קישורים: ${String((err as Error).message ?? err)}`)
+      }
     }
 
     const byId = new Map<string, LibraryEntry>(LIBRARY.map((e) => [e.id, e]))
@@ -140,10 +162,10 @@ export const searchHalacha = createServerFn({ method: 'POST' })
       const e = byId.get(h.entryId)!
       return {
         ...h,
-        title: e.title,
+        title: h.book || e.title,
         author: e.author,
         community: e.community,
-        match: isDirect(h.text, stageA.searchQuery) ? 'ישיר' : 'סוגיה דומה',
+        match: h.match ?? (isDirect(h.text, stageA.searchQuery) ? 'ישיר' : 'סוגיה דומה'),
       } satisfies SearchResult
     })
       // התאמות ישירות קודם, בלי לשנות את סדר המאגר בתוך כל קבוצה
@@ -161,6 +183,7 @@ export const searchHalacha = createServerFn({ method: 'POST' })
       filteredOutBySites,
       notConnected,
       images: findApprovedImages(`${data.question} ${data.imageDescription ?? ''}`),
+      unavailable: [...unavailable],
       errors: [...new Set(errors)],
     }
   })

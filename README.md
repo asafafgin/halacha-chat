@@ -8,7 +8,8 @@
 
 ```bash
 npm install
-npm run dev        # http://localhost:3000
+npm run library:build   # הורדת ספרי הספרייה לעותק מקומי (data/library.db), כחצי דקה
+npm run dev             # http://localhost:3000
 npm run build && node .output/server/index.mjs   # הרצת גרסת ייצור
 ```
 
@@ -19,6 +20,12 @@ npm run build && node .output/server/index.mjs   # הרצת גרסת ייצור
 | `ANTHROPIC_API_KEY` | לא | מפעיל את שכבת הבינה (הבנת שאלה ותיאור תמונה). בלעדיו החיפוש עובד עם חילוץ מילים פשוט, ותיאור תמונה כבוי. |
 | `HALACHA_AI_MODEL` | לא | מודל הבינה. ברירת מחדל: `claude-opus-5-5`. |
 | `HALACHA_USER_AGENT` | לא | User-Agent לבקשות למאגרים. ויקיטקסט מבקש User-Agent עם פרטי קשר. |
+
+## עותק מקומי
+
+`npm run library:build` מוריד מספריא את הטקסט העברי של כל ספר ברשימה עם גישה מסוג `sefaria`, ושומר אותו ב־SQLite עם אינדקס חיפוש מלא (`data/library.db`, כ־170 מגה ל־12 הרשומות הנוכחיות). כשהקובץ קיים, החיפוש רץ עליו בלבד ולא פונה לספריא. ספר שאין לו עותק מקומי נשלף בזמן אמת, כגיבוי. אם מאגר לא עונה, מוצגת הודעה שהמאגר לא זמין, ולא "לא נמצא מקור".
+
+אפשר להריץ רק לרשומות מסוימות: `npm run library:build -- mishnah-berurah tur`. הנתיב ניתן לשינוי ב־`HALACHA_LIBRARY_DB`.
 
 ## הספרייה: מאיפה מגיעות התשובות
 

@@ -254,7 +254,9 @@ function Results({ result }: { result: SearchResponse }) {
         <Notice>
           {result.filteredOutBySites > 0
             ? `נמצאו ${result.filteredOutBySites} מקורות, אבל כולם מאתרים שאינם ברשימת האתרים המאושרים. לא מוצגת תשובה.`
-            : 'לא נמצא מקור בספרייה המוגדרת לשאלה הזו. לא מוצגת תשובה.'}
+            : result.unavailable.length > 0
+              ? `לא ניתן היה לחפש כרגע: ${result.unavailable.join(', ')} לא זמין. זה לא אומר שאין מקור. נסו שוב מאוחר יותר.`
+              : 'לא נמצא מקור בספרייה המוגדרת לשאלה הזו. לא מוצגת תשובה.'}
         </Notice>
       ) : (
         <>
@@ -277,7 +279,7 @@ function Results({ result }: { result: SearchResponse }) {
                     )}
                   </div>
                   <blockquote className="mt-2 border-r-2 border-accent pr-3 font-serif text-lg leading-relaxed">
-                    {r.text}
+                    <LongText text={r.text} />
                   </blockquote>
                   <div className="mt-2 flex flex-wrap gap-x-3 text-xs text-muted">
                     <span>עדה: {r.community}</span>
@@ -345,9 +347,24 @@ function Results({ result }: { result: SearchResponse }) {
         </Card>
       )}
 
-      {result.errors.length > 0 && (
-        <p className="text-xs text-muted">חלק מהמאגרים לא ענו: {result.errors.join(' · ')}</p>
+      {results.length > 0 && result.unavailable.length > 0 && (
+        <Notice>
+          {result.unavailable.join(', ')} לא זמין כרגע, ולכן ייתכן שיש מקורות נוספים שלא הוצגו.
+        </Notice>
       )}
     </div>
+  )
+}
+
+function LongText({ text, max = 600 }: { text: string; max?: number }) {
+  const [open, setOpen] = useState(false)
+  if (text.length <= max) return <>{text}</>
+  return (
+    <>
+      {open ? text : text.slice(0, max) + '…'}{' '}
+      <button type="button" onClick={() => setOpen(!open)} className="font-sans text-sm text-accent underline">
+        {open ? 'פחות' : 'להמשך הקטע'}
+      </button>
+    </>
   )
 }
