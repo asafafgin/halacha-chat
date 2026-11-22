@@ -5,7 +5,7 @@
 // מה שלא רשום כאן לא נכנס לתוצאות, גם אם הוא קיים באינטרנט.
 //
 // סוגי גישה (access):
-//   sefaria    — ספר שהטקסט שלו נשלף מספריא. path הוא נתיב הקטגוריה בספריא.
+//   sefaria    — ספר שהטקסט שלו נשלף מספריא. path הוא נתיב הקטגוריה בספריא (או כמה נתיבים).
 //   wikisource — ספר בוויקיטקסט העברי. titlePrefix הוא תחילת שם הדף.
 //   web        — רשימת דפים ספציפיים (קישורים). המערכת קוראת רק את הדפים האלה.
 //   feed       — קובץ נתונים שמפורסם במקום אחר (למשל באתר צג חומה). נקרא ישירות משם, בלי עותק כפול.
@@ -16,7 +16,7 @@ export const COMMUNITIES = ['כללי', 'ספרדי', 'אשכנזי', 'תימנ�
 export type Community = (typeof COMMUNITIES)[number]
 
 export type LibraryAccess =
-  | { type: 'sefaria'; path: string }
+  | { type: 'sefaria'; path: string | Array<string> }
   | { type: 'wikisource'; titlePrefix: string }
   | { type: 'web'; urls: Array<string> }
   | { type: 'feed'; format: 'tzaghoma-yalkut'; url: string; partsUrl: string; credit: string }
@@ -131,6 +131,176 @@ export const LIBRARY: Array<LibraryEntry> = [
     access: { type: 'sefaria', path: 'Halakhah/Shulchan Arukh HaRav' },
   },
 
+  // ---------- שו״ת ----------
+  {
+    id: 'rashba',
+    title: 'שו״ת הרשב״א',
+    author: 'רבי שלמה בן אדרת',
+    community: 'כללי',
+    access: { type: 'sefaria', path: "Responsa/Rishonim/Rashba" },
+  },
+  {
+    id: 'teshuvot-harosh',
+    title: 'תשובות הרא״ש',
+    author: 'רבנו אשר בן יחיאל',
+    community: 'כללי',
+    access: { type: 'sefaria', path: "Responsa/Rishonim/Teshuvot HaRosh" },
+  },
+  {
+    id: 'teshuvot-harambam',
+    title: 'תשובות הרמב״ם',
+    author: 'הרמב״ם',
+    community: 'כללי',
+    access: { type: 'sefaria', path: "Responsa/Rishonim/Rambam/Teshuvot HaRambam" },
+  },
+  {
+    id: 'rivash',
+    title: 'שו״ת הריב״ש',
+    author: 'רבי יצחק בר ששת',
+    community: 'כללי',
+    access: { type: 'sefaria', path: "Responsa/Rishonim/Teshuvot HaRivash" },
+  },
+  {
+    id: 'teshuvot-haran',
+    title: 'שו״ת הר״ן',
+    author: 'רבנו נסים גירונדי',
+    community: 'כללי',
+    access: { type: 'sefaria', path: "Responsa/Rishonim/Teshuvot HaRan" },
+  },
+  {
+    id: 'bmareh-habazak',
+    title: 'שו״ת במראה הבזק',
+    author: 'רבני ארץ חמדה',
+    community: 'כללי',
+    access: { type: 'sefaria', path: "Responsa/Modern/B'Mareh HaBazak" },
+  },
+  {
+    id: 'radbaz',
+    title: 'שו״ת הרדב״ז',
+    author: 'רבי דוד בן זמרה',
+    community: 'ספרדי',
+    access: { type: 'sefaria', path: "Responsa/Acharonim/Radbaz" },
+  },
+  {
+    id: 'maharit',
+    title: 'שו״ת מהרי״ט',
+    author: 'רבי יוסף מטראני',
+    community: 'ספרדי',
+    access: { type: 'sefaria', path: "Responsa/Acharonim/Teshuvot Maharit" },
+  },
+  {
+    id: 'maharashdam',
+    title: 'שו״ת מהרשד״ם',
+    author: 'רבי שמואל די מדינה',
+    community: 'ספרדי',
+    access: { type: 'sefaria', path: "Responsa/Acharonim/Responsa Maharashdam" },
+  },
+  {
+    id: 'rav-pealim',
+    title: 'שו״ת רב פעלים',
+    author: 'רבי יוסף חיים מבגדאד',
+    community: 'ספרדי',
+    access: { type: 'sefaria', path: "Responsa/Acharonim/Responsa Rav Pealim" },
+  },
+  {
+    id: 'mishpetei-uziel',
+    title: 'משפטי עוזיאל',
+    author: 'הרב בן ציון מאיר חי עוזיאל',
+    community: 'ספרדי',
+    access: { type: 'sefaria', path: "Responsa/Modern/Mishpetei Uziel" },
+  },
+  {
+    id: 'terumat-hadeshen',
+    title: 'תרומת הדשן',
+    author: 'רבי ישראל איסרלין',
+    community: 'אשכנזי',
+    access: { type: 'sefaria', path: "Responsa/Rishonim/Terumat HaDeshen" },
+  },
+  {
+    id: 'teshuvot-maharam',
+    title: 'תשובות מהר״ם',
+    author: 'מהר״ם מרוטנבורג',
+    community: 'אשכנזי',
+    access: { type: 'sefaria', path: "Responsa/Rishonim/Teshuvot Maharam" },
+  },
+  {
+    id: 'teshuvot-harema',
+    title: 'שו״ת הרמ״א',
+    author: 'רבי משה איסרליש',
+    community: 'אשכנזי',
+    access: { type: 'sefaria', path: "Responsa/Acharonim/Responsa of Rema" },
+  },
+  {
+    id: 'teshuvot-habach',
+    title: 'תשובות הב״ח',
+    author: 'רבי יואל סירקיש',
+    community: 'אשכנזי',
+    access: { type: 'sefaria', path: "Responsa/Acharonim/Teshuvot Bayit Chadash" },
+  },
+  {
+    id: 'maharshal',
+    title: 'תשובות מהרש״ל',
+    author: 'רבי שלמה לוריא',
+    community: 'אשכנזי',
+    access: { type: 'sefaria', path: "Responsa/Acharonim/Teshuvot Maharshal" },
+  },
+  {
+    id: 'chakham-tzvi',
+    title: 'שו״ת חכם צבי',
+    author: 'רבי צבי הירש אשכנזי',
+    community: 'אשכנזי',
+    access: { type: 'sefaria', path: "Responsa/Acharonim/Chakham Tzvi" },
+  },
+  {
+    id: 'havot-yair',
+    title: 'שו״ת חוות יאיר',
+    author: 'רבי יאיר חיים בכרך',
+    community: 'אשכנזי',
+    access: { type: 'sefaria', path: "Responsa/Acharonim/Havot Yair" },
+  },
+  {
+    id: 'noda-biyehudah',
+    title: 'נודע ביהודה',
+    author: 'רבי יחזקאל לנדא',
+    community: 'אשכנזי',
+    access: { type: 'sefaria', path: ["Responsa/Acharonim/Noda BiYehudah I", "Responsa/Acharonim/Noda BiYehudah II"] },
+  },
+  {
+    id: 'chatam-sofer',
+    title: 'שו״ת חתם סופר',
+    author: 'רבי משה סופר',
+    community: 'אשכנזי',
+    access: { type: 'sefaria', path: "Responsa/Acharonim/Responsa Chatam Sofer" },
+  },
+  {
+    id: 'rabbi-akiva-eiger',
+    title: 'תשובות רבי עקיבא איגר',
+    author: 'רבי עקיבא איגר',
+    community: 'אשכנזי',
+    access: { type: 'sefaria', path: ["Responsa/Acharonim/Teshuvot Rabbi Akiva Eiger", "Responsa/Acharonim/Teshuvot Rabbi Akiva Eiger HaChadashot", "Responsa/Acharonim/Teshuvot Rabbi Akiva Eiger Tinyana"] },
+  },
+  {
+    id: 'shoel-umeshiv',
+    title: 'שואל ומשיב',
+    author: 'רבי יוסף שאול נתנזון',
+    community: 'אשכנזי',
+    access: { type: 'sefaria', path: "Responsa/Acharonim/Shoel uMeshiv" },
+  },
+  {
+    id: 'maharsham',
+    title: 'שו״ת מהרש״ם',
+    author: 'רבי שלום מרדכי שבדרון',
+    community: 'אשכנזי',
+    access: { type: 'sefaria', path: ["Responsa/Acharonim/Teshuvot Maharsham Volume I", "Responsa/Acharonim/Teshuvot Maharsham Volume II", "Responsa/Acharonim/Teshuvot Maharsham Volume III"] },
+  },
+  {
+    id: 'melammed-lehoil',
+    title: 'מלמד להועיל',
+    author: 'רבי דוד צבי הופמן',
+    community: 'אשכנזי',
+    access: { type: 'sefaria', path: ["Responsa/Acharonim/Melammed Lehoil", "Responsa/Acharonim/Melammed Lehoil Part II", "Responsa/Acharonim/Melammed Lehoil Part III"] },
+  },
+
   // ---------- תימני ----------
   // הרב קאפח אינו נכלל, לפי האפיון.
   {
@@ -155,6 +325,12 @@ export const LIBRARY: Array<LibraryEntry> = [
     access: { type: 'none', note: 'ממתין למאגר מורשה' },
   },
 ]
+
+/** נתיבי ספריא של רשומה */
+export function sefariaPaths(entry: LibraryEntry): Array<string> {
+  if (entry.access.type !== 'sefaria') return []
+  return Array.isArray(entry.access.path) ? entry.access.path : [entry.access.path]
+}
 
 export function libraryEntry(id: string) {
   return LIBRARY.find((e) => e.id === id)

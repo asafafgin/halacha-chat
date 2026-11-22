@@ -1,4 +1,4 @@
-import type { LibraryEntry } from '#/data/library'
+import { sefariaPaths, type LibraryEntry } from '#/data/library'
 import type { SourceHit } from '../types'
 import { fetchWithTimeout, stripHtml } from './http'
 
@@ -8,7 +8,7 @@ type SefariaSource = { ref?: string; heRef?: string; path?: string; exact?: stri
 
 /** חיפוש בספריא, מוגבל לנתיבי הספרים שברשימה בלבד */
 export async function searchSefaria(term: string, entries: Array<LibraryEntry>): Promise<Array<SourceHit>> {
-  const paths = entries.flatMap((e) => (e.access.type === 'sefaria' ? [{ id: e.id, path: e.access.path }] : []))
+  const paths = entries.flatMap((e) => sefariaPaths(e).map((path) => ({ id: e.id, path })))
   if (!paths.length) return []
 
   const res = await fetchWithTimeout(SEARCH_URL, {

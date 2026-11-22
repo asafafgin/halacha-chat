@@ -11,7 +11,7 @@
 import { DatabaseSync } from 'node:sqlite'
 import { mkdirSync } from 'node:fs'
 import { dirname } from 'node:path'
-import { LIBRARY, type LibraryEntry } from '../src/data/library.ts'
+import { LIBRARY, sefariaPaths, type LibraryEntry } from '../src/data/library.ts'
 import { cleanSegment, hebrewNumeral, normalizeForSearch } from '../src/server/text.ts'
 
 const DB_PATH = process.env.HALACHA_LIBRARY_DB || 'data/library.db'
@@ -44,14 +44,15 @@ function collectBooks(nodes: Array<IndexNode>, out: Array<{ title: string; path:
 }
 
 function booksFor(entry: LibraryEntry, all: Array<{ title: string; path: string }>) {
-  if (entry.access.type !== 'sefaria') return []
-  const base = entry.access.path
-  return all.filter((b) => {
-    if (b.path === base) return true
-    if (!b.path.startsWith(base + '/')) return false
-    // פרשנים על הספר אינם חלק מהספר עצמו
-    return !b.path.slice(base.length).includes('/Commentary')
-  })
+  const bases = sefariaPaths(entry)
+  return all.filter((b) =>
+    bases.some((base) => {
+      if (b.path === base) return true
+      if (!b.path.startsWith(base + '/')) return false
+      // פרשנים על הספר אינם חלק מהספר עצמו
+      return !b.path.slice(base.length).includes('/Commentary')
+    }),
+  )
 }
 
 type Segment = { refEn: string; refHe: string; text: string }

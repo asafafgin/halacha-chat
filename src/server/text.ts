@@ -31,8 +31,14 @@ const TENS = ['', 'י', 'כ', 'ל', 'מ', 'נ', 'ס', 'ע', 'פ', 'צ']
 const HUNDREDS = ['', 'ק', 'ר', 'ש', 'ת', 'תק', 'תר', 'תש', 'תת', 'תתק']
 
 /** מספר עברי בכתיב של מראי מקום: 15 → ט״ו, 649 → תרמ״ט, 1 → א׳ */
-export function hebrewNumeral(n: number) {
-  if (n <= 0 || n >= 1000) return String(n)
+export function hebrewNumeral(n: number): string {
+  if (n <= 0 || n >= 1_000_000) return String(n)
+  if (n >= 1000) {
+    // אלפים: 1146 → א׳קמ״ו
+    const rest = n % 1000
+    const thousands = hebrewNumeral(Math.floor(n / 1000)).replace(/[׳״]/g, '')
+    return rest ? `${thousands}׳${hebrewNumeral(rest)}` : `${thousands}׳`
+  }
   let s = HUNDREDS[Math.floor(n / 100)]
   const rest = n % 100
   if (rest === 15) s += 'טו'
